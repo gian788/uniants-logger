@@ -1,15 +1,18 @@
 <link rel="stylesheet" href="styles/request.css">
 
-<h2> Request </h2>
+<h2>Request</h2>
 
 <div>
-	<input ng-model="query" placeholder="search on request">
+	<div class="input-append">
+	  	<input type="text" ng-model="query" placeholder="search for request">
+	  	<span class="add-on"><i class="icon-search"></i></span>
+	</div>
 </div>
 
-<div id="dashboard">
-  	<div>{{new()}} request of {{request.length}}</div>
+<div id="request-log">
+  	<div class="counter">{{new()}} request of {{request.length}}</div>
   	<ng-once>
-		<ul class="unstyled">
+		<ul class="unstyled request-list">
 	    	<li request req-source="req" ng-repeat="req in filteredRequestes = (request | filter:query | orderBy:'timestamp':true)">
 	    	</li>
 		</ul>

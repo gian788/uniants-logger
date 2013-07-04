@@ -8,4 +8,11 @@ angular.module('devApp')
     $scope.toggle = function(){
     	$scope.open = !$scope.open
     }
+    $scope.count = function(){
+    	var i = 0
+    	angular.forEach($scope.detail, function(det){
+    		i++
+    	})
+    	return i
+    }
   });

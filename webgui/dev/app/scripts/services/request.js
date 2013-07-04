@@ -4,7 +4,7 @@ angular.module('devApp')
   .factory('request',['$rootScope', function request($rootScope) {
   	var requestes = []
   	var minTimestamp = new Date()
-    var socket = io.connect('http://192.168.0.15:3002');
+    var socket = io.connect('http://127.0.0.1:3002');
 	    
     socket.on('req', function (data) {
       if(data){

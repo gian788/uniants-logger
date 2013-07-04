@@ -3,6 +3,7 @@
 	width: 20px;
 	display: inline-block;
 	border-radius: 4px;
+	margin: -5px 0;
 }
 
 .req-status.status-200 {
@@ -15,4 +16,38 @@
 
 .req-status.status-304 {
 	background-color: rgb(228, 145, 81);
+}
+
+#request-log .counter {
+	text-align: right;
+}
+
+.request-list > li {
+	border-bottom: 1px solid  rgb(211, 211, 211);
+	padding: 5px;
+}
+
+.request-list > li:nth-child(even) {
+	background-color: rgb(241, 241, 241);
+}
+
+.request-list > li  div > div {
+	display: inline-block;
+}
+
+.detail-name {
+	font-weight: bold;
+}
+
+ul.details {
+	margin-left: 20px;
+	margin-top: 2px;
+}
+
+.detail-name i {
+	margin-right: 5px;
+}
+
+.detail-name .count {
+	font-weight: normal;
 }

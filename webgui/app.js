@@ -96,7 +96,7 @@ io.sockets.on('connection', function(socket){
         if(data.start && data.end)
             request.getRequestLog(new Date(data.start), new Date(data.end), function(err, res){
                 socket.emit('req', res);
-                console.log(res.length)
+                //console.log(res.length)
             })
         else
             request.getRequestLog(new Date(data.start), function(err, res){

@@ -1,6 +1,6 @@
 <ng-once>
-	<ul ng-controller="RequestDetailsCtrl">
-		<li ng-repeat="(name,detail) in req track by $id($index)">
+	<ul class="unstyled details" ng-controller="RequestDetailsCtrl">
+		<li class="detail" ng-repeat="(name,detail) in req track by $id($index)">
 			<div ng-include="'/views/requestDetail.html'"></div>
 		</li>
 	</ul>
