@@ -1,7 +1,9 @@
-<html>
+<!doctype html>
+<html ng-app>
 <head>
-	<link href="/stylesheets/bootstrap/bootstrap.css" rel="stylesheet">	
-	<link href="/stylesheets/style.css" rel="stylesheet">	
+	<link href="/css/bootstrap/bootstrap.css" rel="stylesheet">	
+  <link href="/css/layout.css" rel="stylesheet"> 
+	<link href="/css/style.css" rel="stylesheet">	
 </head>
 <body data-spy="scroll" data-target=".bs-docs-sidebar" data-twttr-rendered="true">
 
@@ -24,6 +26,9 @@
               <li class="">
                 <a href="#" id="btn-request">Request</a>
               </li>
+               <li class="">
+                <a href="#" id="btn-error">Error</a>
+              </li>
               <li class="">
                 <a href="#" id="btn-events">Events</a>
               </li>
@@ -45,10 +50,14 @@
 
 <div class="container">
 
-  	<div id="dashboard">
+  	<div id="dashboard" ng-controller="RequestLogCtrl">
+      <span>{{new()}} request of {{request.length}}</span>
 
-  		<ul>
-
+  		<ul class="unstyled">
+        <li ng-repeat="req in request | orderBy:'timestamp':true">
+          <div class="req-status status-{{req.statusCode}}"></div>
+          <span>{{req.statusCode}} {{req.method}} {{req.url}} {{req.timestamp | date:'medium'}}</span>
+        </li>
   		</ul>
   	</div>
 
@@ -78,9 +87,11 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-	<script src="/javascripts/bootstrap/bootstrap.min.js"></script>
-	<script src="/javascripts/application.js"></script>
-	<script src="/javascripts/socket.io.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+  	<script src="/js/bootstrap/bootstrap.min.js"></script>
+  	<script src="/js/socket.io.min.js"></script>
+
+    <script src="/js/application.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,6 @@
+<ng-once>
+	<div ng-click="toggle()">
+		<div class="req-status status-{{req.statusCode}}"></div>
+		<span>{{req.statusCode}} {{req.method}} {{req.url}} {{req.timestamp | date:'medium'}}</span>
+	</div>
+</ng-once>

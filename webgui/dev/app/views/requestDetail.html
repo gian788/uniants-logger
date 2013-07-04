@@ -1,0 +1,11 @@
+<ng-once>
+	<div ng-controller="RequestDetailCtrl" ng-click="toggle()">
+		<span>{{name}}</span>
+		<div ng-switch="detailType">
+			<div ng-switch-when="object">
+				<div ng-include="'/views/requestDetails.html'" ng-show="open"></div>
+			</div>
+			<span ng-switch-default>{{detail}}</span>
+		</div>
+	</div>
+</ng-once>

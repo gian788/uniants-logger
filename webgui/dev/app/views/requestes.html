@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="styles/request.css">
+
+<h2> Request </h2>
+
+<div>
+	<input ng-model="query" placeholder="search on request">
+</div>
+
+<div id="dashboard">
+  	<div>{{new()}} request of {{request.length}}</div>
+  	<ng-once>
+		<ul class="unstyled">
+	    	<li request req-source="req" ng-repeat="req in filteredRequestes = (request | filter:query | orderBy:'timestamp':true)">
+	    	</li>
+		</ul>
+	</ng-once>
+</div>

@@ -22,6 +22,7 @@ var N = 10000,
 	t;
 
 //console.log(address)
+console.log(address)
 sock.bindSync(address);
 pool.connect(function(err, keyspace){
 	process.send({connected: true})
@@ -41,6 +42,13 @@ function getMessageProcessFunction(options){
 			return ackProcesser;
 		else
 			return simpleProcesser;		
+}
+
+function getTextDate(date){
+    var day = '' + date.getFullYear();
+    day += (date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
+    day += (date.getDate() < 10) ? '0' + date.getDate() : date.getDate();
+    return day;
 }
 
 function simpleProcesser(env, msg, callback){
@@ -80,7 +88,7 @@ function insertLog(msg, callback){
 	cql += ');';
 	//data.push((new Date()).getTime())*/
 	cql = 'INSERT INTO test (KEY, ?) VALUES (?, ?)';
-	data = [helenus.TimeUUID.fromTimestamp(new Date()), '20130703', JSON.stringify(msg)];
+	data = [helenus.TimeUUID.fromTimestamp(new Date()), getTextDate(new Date()), JSON.stringify(msg)];
 	//console.log(cql)
 
 	//console.log(data)
