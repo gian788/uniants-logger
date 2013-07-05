@@ -32,8 +32,7 @@ angular.module('devApp')
       if(!maxTimestamp)
         getLastFromSource()
       else
-        //getNextFromSource()
-        getPrevFromSource()
+        getNextFromSource()
     }, pollInterval)
 
     var getLastFromSource = function(){
@@ -52,12 +51,18 @@ angular.module('devApp')
       socket.emit('request:getPrev', {replyCh: 'req', ts: minTimestamp})
     }
 
+    var getRangeFromSource = function(start, end){
+      socket.emit('request:getRange', {replyCh: 'req', start: start, end: end})
+    }
+
     return {
     	get: function(){
     		return requestes
     	},
 
-    	getFromSource: getPrevFromSource,
+    	getNextFromSource: getNextFromSource,
+      getPrevFromSource: getPrevFromSource,
+      getRangeFromSource: getRangeFromSource,
 
       setPollInterval: function(interval){
         pollInterval = interval

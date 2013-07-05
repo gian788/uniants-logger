@@ -100,19 +100,4 @@ io.sockets.on('connection', function(socket){
             });    
         })();
     }
-  
-    /*socket.on('request:getLast', function () {
-        return request.getLast(function(err, res){
-            if(err)
-                return console.log(err)                
-            socket.emit('req', res);
-        });
-    });
-    socket.on('request:getLast', function () {
-        return request.getLast(function(err, res){
-            if(err)
-                return console.log(err)                
-            socket.emit('req', res);
-        });
-    });*/
 });
