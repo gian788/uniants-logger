@@ -20,6 +20,10 @@
 
 #request-log .counter {
 	text-align: right;
+	border-bottom: 1px solid  rgb(211, 211, 211);
+	margin-bottom: 5px;
+	margin: 0 -10px 5px;
+	padding: 0 15px;
 }
 
 .request-list > li {
@@ -31,17 +35,25 @@
 	background-color: rgb(241, 241, 241);
 }
 
-.request-list > li  div > div {
+.request-summary > div {
 	display: inline-block;
-}
-
-.detail-name {
-	font-weight: bold;
 }
 
 ul.details {
 	margin-left: 20px;
 	margin-top: 2px;
+}
+
+li.detail:last-child {
+	border-bottom: 0;
+}
+
+li.detail {
+	border-bottom: 1px solid silver;
+}
+
+.detail-name {
+	font-weight: bold;
 }
 
 .detail-name i {

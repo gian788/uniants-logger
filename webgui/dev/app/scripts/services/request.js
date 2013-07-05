@@ -3,39 +3,70 @@
 angular.module('devApp')
   .factory('request',['$rootScope', function request($rootScope) {
   	var requestes = []
-  	var minTimestamp = new Date()
-    var socket = io.connect('http://127.0.0.1:3002');
+  	var minTimestamp, 
+        maxTimestamp
+    var pollInterval = 1000 //ms
+
+    var socket = io.connect('http://127.0.0.1:3002',
+      {
+        'sync disconnect on unload': false
+      });
 	    
     socket.on('req', function (data) {
       if(data){
-        var i = 0
         angular.forEach(data, function(req){
-          var r = JSON.parse(JSON.parse(req.value))
+          var r = JSON.parse(JSON.parse(req.value))//TODO check why duoble JSON
           r.timestamp = new Date(req.ts)
-          if(r.timestamp < minTimestamp)
+          if(!minTimestamp || r.timestamp < minTimestamp)
           	minTimestamp = r.timestamp
-          r.new = true
+          if(!maxTimestamp || r.timestamp > maxTimestamp)
+            maxTimestamp = r.timestamp
           requestes.push(r)
         })
         $rootScope.$apply()
       }
-      console.log(requestes)
-    });
+      //console.log(requestes)
+    })
 
-    setTimeout(function(){
-      if(requestes.length == 0){
-        socket.emit('requestLog')
-      }
-    },1500)
+    setInterval(function(){
+      if(!maxTimestamp)
+        getLastFromSource()
+      else
+        //getNextFromSource()
+        getPrevFromSource()
+    }, pollInterval)
 
+    var getLastFromSource = function(){
+      socket.emit('request:getLast', {replyCh: 'req'})      
+    }
+
+    var getNextFromSource = function(){
+      if(!maxTimestamp)
+        maxTimestamp = new Date()      
+      socket.emit('request:getNext', {replyCh: 'req', ts: maxTimestamp})
+    }
+
+    var getPrevFromSource = function(){  
+      if(!minTimestamp)  
+        minTimestamp = new Date();  
+      socket.emit('request:getPrev', {replyCh: 'req', ts: minTimestamp})
+    }
 
     return {
     	get: function(){
-    		return requestes;
+    		return requestes
     	},
-    	getFromSource: function(){
-    		socket.emit('requestLog', {end: minTimestamp, start: (new Date(1970,1,1)).getTime()}, new Date(1970,1,1))
-    	}
+
+    	getFromSource: getPrevFromSource,
+
+      setPollInterval: function(interval){
+        pollInterval = interval
+        //TODO reset interval
+      },
+
+      getPollInterval: function(){
+        return pollInterval
+      }
     }
 
   }]);

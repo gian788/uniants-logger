@@ -13,7 +13,7 @@ angular.module('devApp')
 
     $scope.$watch('filteredRequestes',function(data){
     	if($scope.filteredRequestes.length==0 && $scope.request.length!=0){
-    		request.getFromSource();
+    		//request.getFromSource();
     		console.log('filteredRequestes')
     	}
     },true)
@@ -21,7 +21,7 @@ angular.module('devApp')
     $scope.$watch('request',function(data){
     	console.log($scope.filteredRequestes.length, $scope.request.length)
     	if($scope.filteredRequestes.length==0 && $scope.request.length!=0){
-    		request.getFromSource();
+    		//request.getFromSource();
     		console.log('request')
     	}
     },true)

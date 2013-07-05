@@ -62,45 +62,57 @@ var cookieParser = express.cookieParser()
 var server = http.createServer(function(){}).listen(3002)
   , io = require('socket.io').listen(server);
 
-io.set('log level', 1)
-io.set('heartbeat', true)
+io.enable('browser client etag');
+io.set('log level', 1);
+io.set('heartbeat timeout', 180);
+
+io.set('transports', [
+  'websocket'
+, 'flashsocket'
+, 'htmlfile'
+, 'xhr-polling'
+, 'jsonp-polling'
+]);
 
 /*var SessionSockets = require('session.socket.io')
   , sessionSockets = new SessionSockets(io, sessionStore, cookieParser);*/
+var request = require('./controllers/request')
 
-
+var routes = {
+    'request:getLast': request.getLast,
+    'request:getNext': request.getNext,
+    'request:getPrev': request.getPrev,
+    'request:getRange': request.getRange,
+}
 //sessionSockets.on('connection', function (err, socket, session) {
 io.sockets.on('connection', function(socket){
-  var request = require('./controllers/request')
-  var start = new Date(),
-      end;
-  start.setHours(0);
-  start.setMinutes(0);
-    setInterval(function(){
-        end = new Date();
-        request.getRequestLog(start, end, function(err, res){
-            if(res && res.length > 0)
-                socket.emit('req', res);
-            start = end;
-        });     
-    }, refreshRate);
+    for(r in routes){
+        (function(){
+            var route = r;
+            socket.on(route, function(data){
+                console.log(route, data)
+                return routes[route](data, function(err, res){
+                    if(err)
+                        console.log(err)                
+                    socket.emit(data.replyCh, res);
+                    console.log(route, res.length)
+                });
+            });    
+        })();
+    }
   
-    socket.on('requestLog', function (data) {
-        console.log('requestLog.data', data);
-        if(!data){
-            console.log('getRequestLog')
-            return request.getRequestLog(new Date(1970,1,1), new Date(), function(err, res){
-                socket.emit('req', res);
-            })
-          }
-        if(data.start && data.end)
-            request.getRequestLog(new Date(data.start), new Date(data.end), function(err, res){
-                socket.emit('req', res);
-                //console.log(res.length)
-            })
-        else
-            request.getRequestLog(new Date(data.start), function(err, res){
-                socket.emit('req', res);
-            })
+    /*socket.on('request:getLast', function () {
+        return request.getLast(function(err, res){
+            if(err)
+                return console.log(err)                
+            socket.emit('req', res);
+        });
     });
+    socket.on('request:getLast', function () {
+        return request.getLast(function(err, res){
+            if(err)
+                return console.log(err)                
+            socket.emit('req', res);
+        });
+    });*/
 });

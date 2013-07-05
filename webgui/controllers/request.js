@@ -14,128 +14,168 @@ var pool = new helenus.ConnectionPool({
 var ready = false;
 
 
-
-var startTimestamp,
-    endTimestamp;
-
-var getRequestLog = function(start, end, callback){
-    switch(arguments.length){
-        case 1:            
-            callback = start;
-            start = undefined;
-        break;
-        case 2:
-            callback = end;
-            end = undefined;
-        break;
-    }
-
-    var day = getTextDate(start);
-
-    var cql = 'SELECT FIRST 20 ?..? FROM test WHERE KEY >= ?;';
-    var params = [];  
-
-    //console.log(day, end, start)
-
-    if(start)
-        if(end)
-            params = [helenus.TimeUUID.fromTimestamp(end), helenus.TimeUUID.fromTimestamp(start), parseInt(day)]
-        else
-            params = [helenus.TimeUUID.fromTimestamp(new Date()), helenus.TimeUUID.fromTimestamp(start), parseInt(day)]
-    
+function genericQuery(cql, params, callback){
     pool.connect(function(err, keyspace){
-      if(err)
-          return console.log(err)
-      pool.cql(cql, params, function(err, results){
-        if(err){
-            console.log(err)
-            return callback(err, null);
-        }
-        //console.log(results)
-        if(results.length == 0)
-            return callback(null, null)
+        if(err)
+            return callback(err, null)
+        //console.log(cql, params)
+        pool.cql(cql, params, function(err, results){
+            if(err)
+                return callback(err, null);
+            if(results.length == 0)
+                return callback(null, null)
 
-        var res = [];
-        var x = 0
-        results.forEach(function(row){ 
-            console.log(++x, row.length)
-            if(row.length == 0)
-                return callback(null, null);          
-            if(row[row.length - 1].timestamp == startTimestamp)
-                return callback(null, null);            
-            startTimestamp = row[0].timestamp;
-            row.forEach(function(name,value,ts,ttl){
-                res.push({name: name, value: value, ts: ts})
+            var res = [];
+            results.forEach(function(row){ 
+                row.forEach(function(name,value,ts,ttl){
+                    res.push({name: name, value: value, ts: ts});
+                });
             });
-        });
-        callback(null, res)   
-     }); 
-    })
-    
+            callback(null, res)   
+        }); 
+    });
 }
 
-var getErrorLog = function(){
+function getLast(cf, limit, callback){
+    if(arguments.length != 3)
+        return callback('Error: Wrong number of arguments. 3 required');
+    var self = this;
+    var cql = 'SELECT FIRST ' + limit + ' ?..? FROM ' + cf +' WHERE KEY = ?;';
+    var date = new Date();
+    self.params = [    
+        helenus.TimeUUID.fromTimestamp(date),
+        helenus.TimeUUID.fromTimestamp(getMidnigth(date)),
+        getTextDate(date)
+    ];
+    var results = [];
+    var recGet = function(){
+        //console.log(cql, [date, getMidnigth(date), getTextDate(date)])
+        genericQuery(cql, self.params, function(err, res){
+            if(err)
+                return callback(err, null);
 
-}
+            for(var i in res)
+                results.push(res[i]);
 
-var getEventLog = function(){
-    switch(arguments.length){
-        case 1:            
-            callback = start;
-            start = undefined;
-        break;
-        case 2:
-            callback = end;
-            end = undefined;
-        break;
-    }    
-    
-    var cql = 'SELECT * FROM test ';
-    var params = [];  
-
-    if(start){
-        cql = 'WHERE KEY > ?';
-        params.push(getTextDate(start))
-        if(end){
-            cql += ' AND KEY < ?;';   
-            params.push(getTextDate(end));
-        }
-    }else{
-        cql = 'WHERE KEY = ?;';
-        params.push(getTextDate(new Date()));
+            if(results.length < limit){
+                date = new Date(date.setDate(date.getDate() - 1));
+                self.params = [
+                    helenus.TimeUUID.fromTimestamp(new Date()),
+                    helenus.TimeUUID.fromTimestamp(getMidnigth(date)),
+                    getTextDate(date)
+                ];
+                return recGet();
+            }
+            //TODO fix loop problem when go to the last row            
+            return callback(null, results);            
+        });    
     }
+    recGet(); 
+}
 
-    //console.log(day, end, start)
-
-    if(start)
-        if(end)
-            params = [helenus.TimeUUID.fromTimestamp(end), helenus.TimeUUID.fromTimestamp(start), day]
-        else
-            params = [helenus.TimeUUID.fromTimestamp(new Date()), helenus.TimeUUID.fromTimestamp(start), day]
-    else
-        if(startTimestamp)
-            params = [helenus.TimeUUID.fromTimestamp(new Date()), helenus.TimeUUID.fromTimestamp(startTimestamp), day]
-        else
-            params = [helenus.TimeUUID.fromTimestamp(new Date()), helenus.TimeUUID.fromTimestamp(new Date(1970,1,1)), day]
-    
-    pool.cql(cql, params, function(err, results){
-        if(err){
-            console.log(err)
+function getNext(timestamp, cf, limit, callback){
+    if(arguments.length != 4)
+        return callback('Error: Wrong number of arguments. 3 required');
+    var self = this;
+    var cql = 'SELECT FIRST ' + limit + ' ?..? FROM ' + cf +' WHERE KEY = ?;';
+    var date = new Date(timestamp);
+    self.params = [    
+        helenus.TimeUUID.fromTimestamp(new Date()),
+        helenus.TimeUUID.fromTimestamp(date),
+        getTextDate(date)
+    ]; 
+    //console.log(cql, [new Date(), getMidnigth(date), getTextDate(date)])
+    genericQuery(cql, self.params, function(err, res){
+        if(err)
             return callback(err, null);
-        }
-        //console.log(results)
-        if(results.length == 0)
-            return callback(null, null)
-        results.forEach(function(row){ 
-            if(row.length == 0)
-                return callback(null, null);          
-            if(row[row.length - 1].timestamp == startTimestamp)
-                return callback(null, null);            
-            startTimestamp = row[0].timestamp;
-            callback(null, results)          
-        });
-    }); 
-};
+        return callback(null, res);
+    });    
+     
+}
+
+function getPrev(timestamp, cf, limit, callback){
+    if(arguments.length != 4)
+        return callback('Error: Wrong number of arguments. 3 required');
+    var self = this;
+    var cql = 'SELECT FIRST ' + limit + ' ?..? FROM ' + cf +' WHERE KEY = ?;';
+    var date = new Date(timestamp);
+    self.params = [    
+        helenus.TimeUUID.fromTimestamp(date),
+        helenus.TimeUUID.fromTimestamp(new Date(1970,1,1)),
+        getTextDate(date)
+    ];
+    var results = [];
+    var recGet = function(){
+        console.log(cql, [date, new Date(1970,1,1), getTextDate(date)])
+        genericQuery(cql, self.params, function(err, res){
+            if(err)
+                return callback(err, null);
+
+            for(var i in res)
+                results.push(res[i]);
+
+            if(results.length < limit){
+                date = new Date(date.setDate(date.getDate() - 1));
+                console.log(self.params)
+               self.params = [    
+                     helenus.TimeUUID.fromTimestamp(new Date(timestamp)),
+                    helenus.TimeUUID.fromTimestamp(new Date(1970,1,1)),
+                    getTextDate(date)
+                ];
+                console.log(self.params)
+                return recGet();
+            }
+            //TODO fix loop problem when go to the last row            
+            return callback(null, results);            
+        });    
+    }
+    recGet();
+}
+
+function getRange(start, end, cf, limit, callback){
+    if(arguments.length != 3)
+        return callback('Error: Wrong number of arguments. 3 required');
+    var self = this;
+    var cql = 'SELECT FIRST ' + limit + ' ?..? FROM ' + cf +' WHERE KEY = ?;';
+    var date = new Date(timestamp);
+    self.params = [    
+        helenus.TimeUUID.fromTimestamp(end),
+        helenus.TimeUUID.fromTimestamp(start),
+        getTextDate(end)
+    ];
+    var results = [];
+    var recGet = function(){
+        genericQuery(cql, self.params, function(err, res){
+            if(err)
+                return callback(err, null);
+            if(results.length + res.length < limit){
+                if(results.length == 0)
+                    results = res;
+                end = getMidnigth(new Date(end.setDate(end.getDate() - 1)));
+                if(end < start){
+                    if(results.length == 0)
+                        return callback(null, res);    
+                    for(var i in res)
+                        results.push(res[i]);
+                    return callback(null, results);
+                }
+                self.params = [
+                    helenus.TimeUUID.fromTimestamp(end),
+                    helenus.TimeUUID.fromTimestamp(start),
+                    getTextDate(end)
+                ];
+                recGet();
+            }else{
+                if(results.length == 0)
+                    return callback(null, res);    
+                for(var i in res)
+                    results.push(res[i]);
+                return callback(null, results);
+            }
+        });    
+    }
+    recGet(); 
+}
 
 function getTextDate(date){
     var day = '' + date.getFullYear();
@@ -144,9 +184,31 @@ function getTextDate(date){
     return day;
 }
 
-exports.getRequestLog = getRequestLog;
-exports.getErrorLog = getErrorLog;
-exports.getEventLog = getEventLog;
+function getMidnigth(date){
+    if(typeof(date) != 'object')        
+        date = new Date(date);
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());    
+}
+
+
+
+exports.getLast = function(data, callback){
+    getLast('test', 20, callback);
+}
+
+exports.getNext = function(data, callback){
+    getNext(data.ts, 'test', 20, callback);
+}
+
+exports.getPrev = function(data, callback){
+    getPrev(data.ts, 'test', 20, callback);
+}
+
+exports.getRange = function(data, callback){
+    getRange(data.start, data.end, 'test', 20, callback);
+}
+
+
 
 /*
 create column family test

@@ -4,13 +4,13 @@
 
 <div>
 	<div class="input-append">
-	  	<input type="text" ng-model="query" placeholder="search for request">
+	  	<input type="text" ng-model="query" placeholder="search request...">
 	  	<span class="add-on"><i class="icon-search"></i></span>
 	</div>
 </div>
 
 <div id="request-log">
-  	<div class="counter">{{new()}} request of {{request.length}}</div>
+  	<div class="counter">{{request.length}} request</div>
   	<ng-once>
 		<ul class="unstyled request-list">
 	    	<li request req-source="req" ng-repeat="req in filteredRequestes = (request | filter:query | orderBy:'timestamp':true)">

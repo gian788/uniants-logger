@@ -89,7 +89,7 @@ function insertLog(msg, callback){
 	//data.push((new Date()).getTime())*/
 	cql = 'INSERT INTO test (KEY, ?) VALUES (?, ?)';
 	data = [helenus.TimeUUID.fromTimestamp(new Date()), getTextDate(new Date()), JSON.stringify(msg)];
-	//console.log(cql)
+	console.log(cql, data)
 
 	//console.log(data)
 	//pool.cql("INSERT INTO log (KEY, ?, ?) VALUES (?, ?, ?);", ['code', 'url', (new Date()).getTime(), 404, '/user'], function(err, results){

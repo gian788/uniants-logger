@@ -1,5 +1,5 @@
 <ng-once>
-	<div ng-click="toggle()">
+	<div class="request-summary" ng-click="toggle()">
 		<div class="req-status status-{{req.statusCode}}"></div>
 		<div class="">{{req.statusCode}} {{req.method}} {{req.url}}</div>
 		<div class="pull-right">{{req.timestamp | date:'HH:mm:ss   MM-dd'}}</div>
