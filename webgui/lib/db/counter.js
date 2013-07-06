@@ -27,7 +27,7 @@ function genericQuery(cql, params, callback){
 
             var res = {};
             results.forEach(function(row){ 
-                res['' + row.key] = {};
+                res['' + getDateFromText(row.key).getTime()] = {};
                 row.forEach(function(name,value,ts,ttl){
                     res['' + row.key] = value;
                 });
@@ -36,7 +36,6 @@ function genericQuery(cql, params, callback){
         }); 
     });
 }
-
 
 function getDailyCounter(start, end, cf, callback){
     if(arguments.length != 5)
@@ -72,6 +71,15 @@ var getPrev = function(timestamp, cf, limit, callback){
 var getRange = function(start, end, cf, callback){
     getDailyCounter(new Date(start), new Date(end), cf, callback);
 }
+
+function getDateFromText(text){
+    return new Date(
+        text.substring(0,4),
+        text.substring(4, 2),
+        text.substring(6,2)
+    );
+}
+
 
 exports.getDay = getDay;
 exports.getLast = getLast;

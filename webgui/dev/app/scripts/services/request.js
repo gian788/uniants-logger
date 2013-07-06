@@ -15,7 +15,8 @@ angular.module('devApp')
     socket.on('req', function (data) {
       if(data){
         angular.forEach(data, function(req){
-          var r = JSON.parse(JSON.parse(req.value))//TODO check why duoble JSON
+          var r = JSON.parse(req.value)//TODO check why duoble JSON
+          console.log(r)
           r.timestamp = new Date(req.ts)
           if(!minTimestamp || r.timestamp < minTimestamp)
           	minTimestamp = r.timestamp
@@ -29,6 +30,7 @@ angular.module('devApp')
     })
 
     setInterval(function(){
+      console.log('res')
       if(!maxTimestamp)
         getLastFromSource()
       else

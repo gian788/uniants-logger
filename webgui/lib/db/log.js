@@ -17,7 +17,7 @@ var ready = false;
 function genericQuery(cql, params, callback){
     pool.connect(function(err, keyspace){
         if(err)
-            return callback(err, null)
+            return callback(err, null)        
         //console.log(cql, params)
         pool.cql(cql, params, function(err, results){
             if(err)
@@ -31,6 +31,7 @@ function genericQuery(cql, params, callback){
                     res.push({name: name, value: value, ts: ts});
                 });
             });
+
             callback(null, res)   
         }); 
     });
@@ -48,16 +49,17 @@ function getLast(cf, limit, callback){
         getTextDate(date)
     ];
     var results = [];
+    var count = 0;
     var recGet = function(){
         //console.log(cql, [date, getMidnigth(date), getTextDate(date)])
         genericQuery(cql, self.params, function(err, res){
             if(err)
                 return callback(err, null);
-
+            //console.log(res)
             for(var i in res)
                 results.push(res[i]);
-
-            if(results.length < limit){
+            if(results.length < limit && ++count < 90){
+                console.log('rec' + count)
                 date = new Date(date.setDate(date.getDate() - 1));
                 self.params = [
                     helenus.TimeUUID.fromTimestamp(new Date()),
@@ -66,7 +68,7 @@ function getLast(cf, limit, callback){
                 ];
                 return recGet();
             }
-            //TODO fix loop problem when go to the last row            
+            //TODO fix loop problem when go to the last row          
             return callback(null, results);            
         });    
     }
@@ -106,7 +108,7 @@ function getPrev(timestamp, cf, limit, callback){
     ];
     var results = [];
     var recGet = function(){
-        console.log(cql, [date, new Date(1970,1,1), getTextDate(date)])
+        //console.log(cql, [date, new Date(1970,1,1), getTextDate(date)])
         genericQuery(cql, self.params, function(err, res){
             if(err)
                 return callback(err, null);
@@ -115,13 +117,11 @@ function getPrev(timestamp, cf, limit, callback){
 
             if(results.length < limit){
                 date = new Date(date.setDate(date.getDate() - 1));
-                console.log(self.params)
                 self.params = [    
                     helenus.TimeUUID.fromTimestamp(new Date(timestamp)),
                     helenus.TimeUUID.fromTimestamp(new Date(1970,1,1)),
                     getTextDate(date)
                 ];
-                console.log(self.params)
                 return recGet();
             }
             //TODO fix loop problem when go to the last row            

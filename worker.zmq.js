@@ -21,86 +21,92 @@ var N = 10000,
 	i = 0,
 	t;
 
-//console.log(address)
-console.log(address)
+var processors = {
+	'error': 1,
+	'event': 2,
+	'request': 3
+}
+
+var handleMessage,
+	processMessage;
+
 sock.bindSync(address);
 pool.connect(function(err, keyspace){
 	process.send({connected: true})
 	console.log('Worker started at ' + address);
+	//console.log(options)
+	setMessageProcessFunction(options)
 	
-	sock.on('message', getMessageProcessFunction(options));
+	sock.on('message', handleMessage);
 })
 
-function getMessageProcessFunction(options){
+function setMessageProcessFunction(options){
+	switch(options.logType){
+		case 'event':
+			processMessage = insertEvent;
+		break;
+		case 'error':
+			processMessage = insertError;
+		break;
+		case 'request':
+			processMessage = insertRequest;			
+		break;		
+		default:
+			processMessage = insertLog;
+		break;
+	}
+
 	if(options.json)
 		if(options.ack)
-			return jsonAckProcesser;
+			handleMessage = jsonAckHandler;
 		else
-			return jsonProcesser;
+			handleMessage = jsonHandler;
 	else
 		if(options.ack)
-			return ackProcesser;
+			handleMessage = ackHandler;
 		else
-			return simpleProcesser;		
+			handleMessage = simpleHandler;		
 }
 
-function getTextDate(date){
-    var day = '' + date.getFullYear();
-    day += (date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
-    day += (date.getDate() < 10) ? '0' + date.getDate() : date.getDate();
-    return day;
+/** Handler function **/
+
+function simpleHandler(env, msg, callback){
+	processMessage(msg.toString());		
 }
 
-function simpleProcesser(env, msg, callback){
-	insertLog(msg.toString());		
+function jsonHandler(env, msg, callback){
+	msg = JSON.parse(msg.toString()).data;
+	processMessage(msg);
 }
 
-function jsonProcesser(env, msg, callback){
-	msg = JSON.parse(msg.toString());
-	insertLog(msg)
-}
-
-function ackProcesser(env, msg, callback){
-	insertLog(msg.toString(), function(){
+function ackHandler(env, msg, callback){
+	processMessage(msg.toString(), function(){
 		sock.send([env, ack]);	
-	})	
+	});	
 }
 
-function jsonAckProcesser(env, msg, callback){
-	msg = JSON.parse(msg.toString());
-	insertLog(msg)
-	sock.send([env, ack]);
+function jsonAckHandler(env, msg, callback){
+	msg = JSON.parse(msg.toString()).data;
+	processMessage(msg, function(){
+		sock.send([env, ack]);
+	});
 }
 
-function insertLog(msg, callback){
-	msg = msg
+/** Database insert function **/
+
+function insertLog(msg, cf, callback){
 	var data = [(new Date()).getTime()];
-	var cql = 'INSERT INTO test (KEY,';
-	/*for(var i in msg)
-		cql += "" + i + ",";
-	cql = cql.substring(0, cql.length - 1);
-	cql += ") VALUES (?,";
-	for(var i in msg){
-		cql += '?,';
-		data.push(JSON.stringify(msg[i]))
-	}
-	cql = cql.substring(0, cql.length - 1);
-	cql += ');';
-	//data.push((new Date()).getTime())*/
-	cql = 'INSERT INTO test (KEY, ?) VALUES (?, ?)';
+	cql = 'INSERT INTO ' + cf + ' (KEY, ?) VALUES (?, ?)';
 	data = [helenus.TimeUUID.fromTimestamp(new Date()), getTextDate(new Date()), JSON.stringify(msg)];
-	console.log(cql, data)
-
-	//console.log(data)
-	//pool.cql("INSERT INTO log (KEY, ?, ?) VALUES (?, ?, ?);", ['code', 'url', (new Date()).getTime(), 404, '/user'], function(err, results){
+	//console.log(cql, data);
 	pool.cql(cql, data, function(err, results){
 	    if(err){
 	      //TODO Log error
 	      console.log(err);
-	      //return;
+	      return;
 	    }          
 	    if(callback && typeof(callback) == 'function')
-	    	callback(err, res)      
+	    	callback(err, res);    
 	});
 
 	if(!t)
@@ -109,4 +115,50 @@ function insertLog(msg, callback){
 		process.send({recived: 10000, startT: t, finishT: (new Date()).getTime()});
 		process.exit();
 	}
+}
+
+function insertCounters(msg, cf, callback){
+	var counters = msg;
+	var data = [];
+	var cql = 'UDPATE ' + cf + ' SET ';
+	for(var c in counters){
+		cql += counterName[c] + ' = ' + counterName[c] + ' + ?,';
+		data.push(counters[c]);
+	}
+	cql = cql.substring(cql.length - 1);
+	cql += ' WHERE KEY = ?;';
+	data.push(getTextDate(new Date()));
+
+	pool.cql(cql, data, function(err, results){
+	    if(err){
+	      //TODO Log error
+	      console.log(err);
+	      return;
+	    }          
+	    if(callback && typeof(callback) == 'function')
+	    	callback(err, res);
+	});
+}
+
+/** Processor function **/
+
+function insertRequest(msg, callback){
+	insertLog(msg, 'request_log', callback);
+}
+
+function insertError(msg, callback){
+	insertLog(msg, 'error_log', callback);
+}
+
+function insertEvent(msg, callback){
+	insertCounters(msg, 'stat_counter', callback);
+}
+
+//TODO put it into utils
+
+function getTextDate(date){
+    var day = '' + date.getFullYear();
+    day += (date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
+    day += (date.getDate() < 10) ? '0' + date.getDate() : date.getDate();
+    return day;
 }

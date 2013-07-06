@@ -1,6 +1,6 @@
 var counter = require('../lib/db/counter.js');
 
-var counterCF = 'counter',
+var counterCF = 'stat_counter',
     limit = 15; //days
 
 exports.getLast = function(data, callback){
