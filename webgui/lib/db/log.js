@@ -13,11 +13,16 @@ var pool = new helenus.ConnectionPool({
 
 var ready = false;
 
+pool.connect(function(err, keyspace){
+    if(err)
+        return console.log(err)  
+    console.log('connected pool')
+});
 
 function genericQuery(cql, params, callback){
-    pool.connect(function(err, keyspace){
-        if(err)
-            return callback(err, null)        
+    //pool.connect(function(err, keyspace){
+        //if(err)
+        //    return callback(err, null)        
         //console.log(cql, params)
         pool.cql(cql, params, function(err, results){
             if(err)
@@ -31,13 +36,12 @@ function genericQuery(cql, params, callback){
                     res.push({name: name, value: value, ts: ts});
                 });
             });
-
-            callback(null, res)   
+            callback(null, res);  
         }); 
-    });
+    //});
 }
 
-function getLast(cf, limit, callback){
+function getLast(cf, limit, callback){    
     if(arguments.length != 3)
         return callback('Error: Wrong number of arguments. 3 required');
     var self = this;
@@ -55,11 +59,9 @@ function getLast(cf, limit, callback){
         genericQuery(cql, self.params, function(err, res){
             if(err)
                 return callback(err, null);
-            //console.log(res)
             for(var i in res)
                 results.push(res[i]);
             if(results.length < limit && ++count < 90){
-                console.log('rec' + count)
                 date = new Date(date.setDate(date.getDate() - 1));
                 self.params = [
                     helenus.TimeUUID.fromTimestamp(new Date()),
@@ -67,8 +69,7 @@ function getLast(cf, limit, callback){
                     getTextDate(date)
                 ];
                 return recGet();
-            }
-            //TODO fix loop problem when go to the last row          
+            }        
             return callback(null, results);            
         });    
     }
@@ -84,9 +85,9 @@ function getNext(timestamp, cf, limit, callback){
     self.params = [    
         helenus.TimeUUID.fromTimestamp(new Date()),
         helenus.TimeUUID.fromTimestamp(date),
-        getTextDate(date)
+        getTextDate(new Date())
     ]; 
-    //console.log(cql, [new Date(), getMidnigth(date), getTextDate(date)])
+    //console.log(cql, [new Date(), date, getTextDate(new Date())])
     genericQuery(cql, self.params, function(err, res){
         if(err)
             return callback(err, null);
@@ -107,6 +108,7 @@ function getPrev(timestamp, cf, limit, callback){
         getTextDate(date)
     ];
     var results = [];
+    var count = 0;
     var recGet = function(){
         //console.log(cql, [date, new Date(1970,1,1), getTextDate(date)])
         genericQuery(cql, self.params, function(err, res){
@@ -115,7 +117,7 @@ function getPrev(timestamp, cf, limit, callback){
             for(var i in res)
                 results.push(res[i]);
 
-            if(results.length < limit){
+            if(results.length < limit && ++count < 90){
                 date = new Date(date.setDate(date.getDate() - 1));
                 self.params = [    
                     helenus.TimeUUID.fromTimestamp(new Date(timestamp)),

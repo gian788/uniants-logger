@@ -53,10 +53,10 @@
                 <a href="/#/error" id="btn-error">Error</a>
               </li>
               <li ng-class="{active:page == '/events'}">
-                <a href="/#/events" id="btn-events">Events</a>
+                <a href="/#/event" id="btn-events">Events</a>
               </li>
               <li ng-class="{active:page == '/alerts'}">
-                <a href="/#/alerts" id="btn-alerts">Alerts</a>
+                <a href="/#/alert" id="btn-alerts">Alerts</a>
               </li>
               <li ng-class="{active:page == '/settings'}">
                 <a href="/#/settings" id="btn-settings">Settings</a>
@@ -78,6 +78,7 @@
         <p>Code licensed under <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License v2.0</a>, documentation under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.  <a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
         <ul class="footer-links">
           <li><a href="http://uniants.com">Uniants</a></li>
+          <li><a href="https://github.com/gian788/uniants-logger/wiki">Docs</a></li>
         </ul>
       </div>
     </footer>
@@ -119,7 +120,6 @@
         <script src="bower_components/angular-resource/angular-resource.js"></script>
         <script src="bower_components/angular-cookies/angular-cookies.js"></script>
         <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-        <script src="scripts/controllers/requestLog.js"></script>
         <script src="scripts/controllers/request.js"></script>
         <script src="scripts/controllers/dashboard.js"></script>
         <script src="scripts/controllers/navbar.js"></script>
@@ -127,6 +127,16 @@
         <script src="scripts/controllers/requestDetail.js"></script>
         <script src="scripts/directives/request.js"></script>
         <script src="scripts/services/request.js"></script>
+        <script src="scripts/controllers/error.js"></script>
+        <script src="scripts/services/socketio.js"></script>
+        <script src="scripts/services/error.js"></script>
+        <script src="scripts/services/log.js"></script>
+        <script src="scripts/controllers/errorDetails.js"></script>
+        <script src="scripts/controllers/errorDetail.js"></script>
+        <script src="scripts/directives/error.js"></script>
+        <script src="scripts/controllers/event.js"></script>
+        <script src="scripts/services/counter.js"></script>
+        <script src="scripts/services/event.js"></script>
         <!-- endbuild -->
 
 </body>

@@ -13,39 +13,60 @@ var pool = new helenus.ConnectionPool({
 
 var ready = false;
 
+pool.connect(function(err, keyspace){
+    if(err)
+        return console.log(err)  
+    console.log('connected pool')
+});
+
 
 function genericQuery(cql, params, callback){
-    pool.connect(function(err, keyspace){
-        if(err)
-            return callback(err, null)
+    
         //console.log(cql, params)
         pool.cql(cql, params, function(err, results){
             if(err)
-                return callback(err, null);
+                return callback(err, []);
             if(results.length == 0)
-                return callback(null, null)
-
+                return callback(null, [])
+            var des = new helenus.Marshal('IntegerType');
             var res = {};
+            //console.log(results)
             results.forEach(function(row){ 
-                res['' + getDateFromText(row.key).getTime()] = {};
-                row.forEach(function(name,value,ts,ttl){
-                    res['' + row.key] = value;
+                //console.log(row)
+                //if(row.count <= 0)
+                  //  return;                
+                var key = '' + getDateFromText('' + des.deserialize(row.key)).getTime()
+                res[key] = {};
+                row.forEach(function(name,value,ts,ttl){ 
+                    res['' + key][name] = value;
                 });
             });
+            //console.log(res);
             callback(null, res)   
         }); 
-    });
+    
 }
 
 function getDailyCounter(start, end, cf, callback){
-    if(arguments.length != 5)
-        return callback('Error: Wrong number of arguments. 5 required');
+    if(arguments.length != 4)
+        return callback('Error: Wrong number of arguments. 4 required');
     
     var self = this;
-    var cql = 'SELECT * FROM ' + cf +' WHERE KEY >= ? AND KEY <= ?;';
+
+    var keys = '';
+    var days = (end.getTime() - start.getTime()) / (24 * 3600 * 1000);
+    days = Math.floor(days)
+    console.log(days)
+    
+    for(var i = 0; i < days + 1; i++)
+        keys += getTextDate((new Date(start)).setDate(start.getDate() + i)) + ',';
+    keys = keys.substring(0, keys.length - 1);
+
+    //var cql = "SELECT * FROM " + cf + " WHERE KEY >= " + getTextDate(start) + " AND KEY < " + getTextDate(end) + ";";    
+    var cql = "SELECT * FROM " + cf + " WHERE KEY IN (" + keys + ");";    
     self.params = [    
-        getTextDate(start),
-        getTextDate(end)
+       // getTextDate(start),
+       // getTextDate(end)
     ];
     genericQuery(cql, self.params, callback);        
 }
@@ -55,12 +76,13 @@ var getDay = function(day, cf, callback){
 }
 
 var getLast = function(cf, limit, callback){
-    getDailyCounter(new Date(), new Date((new Date).getDay() - limit), cf, callback);
+    var startDate = new Date((new Date()).setDate((new Date()).getDate() - (limit - 1 )))
+    getDailyCounter(startDate, new Date(), cf, callback);
 }
 
 var getNext = function(timestamp, cf, limit, callback){
     var date = new Date(timestamp);
-    getDailyCounter(date, new Date(dat.getDay() - limit), cf, callback);
+    getDailyCounter(date, date, cf, callback);
 }
 
 var getPrev = function(timestamp, cf, limit, callback){
@@ -74,10 +96,19 @@ var getRange = function(start, end, cf, callback){
 
 function getDateFromText(text){
     return new Date(
-        text.substring(0,4),
-        text.substring(4, 2),
-        text.substring(6,2)
+        text.substr(0,4),
+        text.substr(4, 2) - 1,
+        text.substr(6,2)
     );
+}
+
+function getTextDate(date){
+    if(typeof(date) != 'object')
+        date = new Date(date);
+    var day = '' + date.getFullYear();
+    day += (date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
+    day += (date.getDate() < 10) ? '0' + date.getDate() : date.getDate();
+    return day;
 }
 
 

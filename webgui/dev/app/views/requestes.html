@@ -10,9 +10,9 @@
 </div>
 
 <div id="request-log">
-  	<div class="counter">{{request.length}} request</div>
+  	<div class="log-counter">{{request.length}} request</div>
   	<ng-once>
-		<ul class="unstyled request-list">
+		<ul class="unstyled log-list">
 	    	<li request req-source="req" ng-repeat="req in filteredRequestes = (request | filter:query | orderBy:'timestamp':true)">
 	    	</li>
 		</ul>

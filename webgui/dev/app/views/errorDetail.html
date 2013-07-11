@@ -1,11 +1,11 @@
 <ng-once>
-	<div ng-controller="RequestDetailCtrl" ng-click="toggle()">	
+	<div ng-controller="ErrorDetailCtrl">	
 		<div ng-switch="detailType">
 			<div ng-switch-when="object">
-				<div class="detail-name expandible">
+				<div class="detail-name expandible" ng-click="toggle()">
 					<i class="" ng-class="{'icon-minus-sign':open,'icon-plus-sign':!open}"></i>{{name}} <span class="count">[{{count()}}]</span>:
 				</div>
-				<div ng-include="'/views/requestDetails.html'" ng-show="open"></div>
+				<div ng-include="'/views/errorDetails.html'" ng-show="open"></div>
 			</div>
 			<div class="detail" ng-switch-default>
 				<span class="detail-name">{{name}}: </span>

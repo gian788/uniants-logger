@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="styles/event.css">
+
+<h2>Event</h2>
+
+<div id="error-log">
+  	<div class="log-counter">{{count()}} days</div>
+  	<div class="log-counter">{{eventType.length}} events type</div>
+  	<ng-once>
+		<ul class="unstyled log-list">
+	    	<li ng-repeat="ev in event | orderBy:'timestamp':true">
+		    	<span>{{ev.timestamp | date }}<!--date:'dd EEE MMM'--></span>
+		    	<ul ng-repeat="(name, value) in ev.counter track by $id($index)">
+		    		<li>{{name}}: {{value}} </li>
+		    	</ul>
+	    	</li>
+		</ul>
+	</ng-once>
+</div>

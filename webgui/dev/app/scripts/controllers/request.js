@@ -3,11 +3,12 @@
 angular.module('devApp')
   .controller('RequestCtrl', function ($scope, request) {
     $scope.request = request.get();
+    
     $scope.$watch(function(){
     	return request.get()
     }, function(value){
     	$scope.request = value;
-    },true)
+    }, true)
 
     $scope.filteredRequestes = [];
 
@@ -24,15 +25,7 @@ angular.module('devApp')
     		request.getPrevFromSource();
     		console.log('request')
     	}
-    },true)
-
-   	$scope.new = function(){
-    	var count = 0
-    	angular.forEach($scope.request, function(req){
-      		count += req.new ? 1 : 0
-    	})
-    	return count
-  	}
+    },true)  	
 
 	 
   });

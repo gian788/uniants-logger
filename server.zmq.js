@@ -52,7 +52,7 @@ sock.on('message', function(env, msg){
 	console.log(msg)
 	if(msg.req == 'boot'){
 		var clientAddress = generateNewAddress()
-		console.log(msg.data)
+		//console.log(msg.data)
 		var proc = childProcess.fork('./worker.zmq.js', [clientAddress, JSON.stringify(msg.data)]);
 		proc.on('message', function(m){
 			if(m.connected){

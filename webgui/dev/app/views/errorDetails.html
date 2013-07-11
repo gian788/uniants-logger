@@ -1,0 +1,7 @@
+<ng-once>
+	<ul class="unstyled details" ng-controller="ErrorDetailsCtrl">
+		<li class="detail" ng-repeat="(name,detail) in err track by $id($index)">
+			<div ng-include="'/views/errorDetail.html'"></div>
+		</li>
+	</ul>
+</ng-once>

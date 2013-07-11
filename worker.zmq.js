@@ -75,6 +75,7 @@ function simpleHandler(env, msg, callback){
 }
 
 function jsonHandler(env, msg, callback){
+	console.log(msg.toString())
 	msg = JSON.parse(msg.toString()).data;
 	processMessage(msg);
 }
@@ -120,15 +121,17 @@ function insertLog(msg, cf, callback){
 function insertCounters(msg, cf, callback){
 	var counters = msg;
 	var data = [];
-	var cql = 'UDPATE ' + cf + ' SET ';
+	var cql = 'UPDATE ' + cf + ' SET ';
 	for(var c in counters){
-		cql += counterName[c] + ' = ' + counterName[c] + ' + ?,';
-		data.push(counters[c]);
+		console.log(c, counters[c])
+		cql += c + ' = ' + c + ' + ' + counters[c] + ',';
+		//data.push(counters[c]);
 	}
-	cql = cql.substring(cql.length - 1);
+	cql = cql.substring(0, cql.length - 1);
 	cql += ' WHERE KEY = ?;';
 	data.push(getTextDate(new Date()));
 
+	//console.log(cql,data)
 	pool.cql(cql, data, function(err, results){
 	    if(err){
 	      //TODO Log error
@@ -151,6 +154,7 @@ function insertError(msg, callback){
 }
 
 function insertEvent(msg, callback){
+	console.log(msg)
 	insertCounters(msg, 'stat_counter', callback);
 }
 

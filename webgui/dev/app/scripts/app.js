@@ -10,7 +10,15 @@ angular.module('devApp', [])
       .when('/request', {
         templateUrl: 'views/requestes.html',
         controller: 'RequestCtrl'
-      })      
+      })
+      .when('/error', {
+        templateUrl: 'views/errors.html',
+        controller: 'ErrorCtrl'
+      })
+      .when('/event', {
+        templateUrl: 'views/event.html',
+        controller: 'EventCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
