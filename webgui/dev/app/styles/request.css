@@ -14,8 +14,15 @@
 	background-color: rgb(196, 87, 87);
 }
 
-.req-status.status-304 {
-	background-color: rgb(228, 145, 81);
+.req-status.status-304, .req-status.status-302 {
+	background-color: rgb(240, 188, 121);
+}
+
+.req-title {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	width: 80%;
 }
 
 .log-counter {

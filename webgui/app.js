@@ -76,7 +76,8 @@ io.set('transports', [
   , sessionSockets = new SessionSockets(io, sessionStore, cookieParser);*/
 var request = require('./controllers/request'),
     error = require('./controllers/error'),
-    event = require('./controllers/event');
+    event = require('./controllers/event'),
+    monitor = require('./controllers/monitor');
 
 var routes = {
     'request:getLast': request.getLast,
@@ -93,6 +94,10 @@ var routes = {
     'event:getNext': event.getNext,
     'event:getPrev': event.getPrev,
     'event:getRange': event.getRange,
+
+    'monitor:get': monitor.get,
+    'monitor:getSysInfo': monitor.getSysInfo,
+    'monitor:getSysUsage': monitor.getSysUsage,
 }
 
 //sessionSockets.on('connection', function (err, socket, session) {

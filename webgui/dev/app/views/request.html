@@ -1,7 +1,7 @@
 <ng-once>
 	<div class="log-summary" ng-click="toggle()">
 		<div class=" req-status status-{{req.res.statusCode}}"></div>
-		<div class="">{{req.res.statusCode}} {{req.req.method}} {{req.req.url}}</div>
+		<div class="req-title">{{req.res.statusCode}} {{req.req.method}} {{req.req.url}}</div>
 		<div class="pull-right">{{req.res.headers['content-length']}}B {{req.timestamp | date:'HH:mm:ss -  MM-dd'}}</div>
 	</div>
 </ng-once>

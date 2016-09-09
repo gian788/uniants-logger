@@ -3,8 +3,8 @@
 angular.module('devApp')
   .service('socketio', function socketio() {
     var self = this;
-  	//var serverAddress = 'http://127.0.0.1:3002';
-    var serverAddress = 'http://192.168.0.15:3002';
+  	var serverAddress = 'http://127.0.0.1:3002';
+    //var serverAddress = 'http://192.168.0.15:3002';
 
     console.log(self.socket)
     self.socket = io.connect(serverAddress);

@@ -19,6 +19,10 @@ angular.module('devApp', [])
         templateUrl: 'views/event.html',
         controller: 'EventCtrl'
       })
+      .when('/monitor', {
+        templateUrl: 'views/monitor.html',
+        controller: 'MonitorCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

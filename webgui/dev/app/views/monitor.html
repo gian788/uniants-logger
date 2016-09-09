@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="styles/request.css">
+
+<h2>Monitor</h2>
+
+<div> CPU: 
+	<ul class="unstyled">
+		<li>min: {{sysUsageLast().loadavg[0].toFixed(3)}}</li>
+		<li>max: {{sysUsageLast().loadavg[1].toFixed(3)}}</li>
+		<li>avg: {{sysUsageLast().loadavg[2].toFixed(3)}}</li>
+	</ul>
+</div>
+
+
+<div class="">RAM: {{((sysUsageLast().total_mem - sysUsageLast().free_mem)/(1024*1024*1024)).toFixed(2)}} / {{((sysUsageLast().total_mem)/(1024*1024*1024)).toFixed(2)}} GB</div>

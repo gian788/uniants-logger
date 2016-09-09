@@ -75,7 +75,7 @@ function simpleHandler(env, msg, callback){
 }
 
 function jsonHandler(env, msg, callback){
-	console.log(msg.toString())
+	//console.log(msg.toString())
 	msg = JSON.parse(msg.toString()).data;
 	processMessage(msg);
 }
